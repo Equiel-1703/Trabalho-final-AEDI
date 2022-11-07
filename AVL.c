@@ -186,34 +186,47 @@ AVLNodo *removeNodo(AVLNodo **raiz, int key)
 // Insere um elemento na árvore
 int incluir(AVLNodo **tree, unsigned int chave, float preco, char *prod)
 {
-    // Se a árvore está vazia, insere o nodo na raíz
-    if (*tree == NULL)
+    AVLNodo *tailPtr = NULL, *ptr = *tree;
+
+    // Depois desse while, tail ptr vai ter o endereço do nó pai onde vamos inserir o novo elemento
+    while (ptr)
     {
-        AVLNodo *newNode = criarNodo(chave, preco, prod);
+        tailPtr = ptr;
+
+        if (chave < ptr->key)
+            ptr = ptr->lChild;
+
+        else if (chave > ptr->key)
+            ptr = ptr->rChild;
+
+        else // A chave é igual, não inserimos
+        {
+            printf("\nVoce nao pode inserir uma chave repetida!\n");
+            return 0;
+        }
+    }
+
+    AVLNodo *newNode = criarNodo(chave, preco, prod);
+
+    // Se tailPtr for vazio, inserimos o nodo na raíz
+    if (tailPtr == NULL)
+    {
         *tree = newNode;
 
         return 1;
     }
 
-    int ret = 0;
-
     // Se não for vazio, verifica para qual direção deve inserir
-    if (chave < (*tree)->key)
-        ret = incluir(&(*tree)->lChild, chave, preco, prod); // Esquerda, chave menor
+    if (chave < tailPtr->key)
+        tailPtr->lChild = newNode;
 
-    else if (chave > (*tree)->key)
-        ret = incluir(&(*tree)->rChild, chave, preco, prod); // Direita, chave maior
-
-    else // Esse else só será executado caso o usuário tente inserir um valor repetido
-    {
-        printf("\nVoce nao pode inserir uma chave repetida!\n");
-        return 0;
-    }
+    else
+        tailPtr->rChild = newNode;
 
     // Balanceia a árvore, se necessário
     balancear(tree);
 
-    return ret;
+    return 1;
 }
 
 // Busca e retorna um elemento na árvore usando a chave
