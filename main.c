@@ -265,8 +265,6 @@ int main(int argc, char const *argv[])
                 imprimeEl(el);
                 free(el);
             }
-            else
-                printf("\nO elemento nao existe na arvore.");
 
             getchar();
             break;

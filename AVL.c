@@ -127,60 +127,86 @@ void balancear(AVLNodo **tree)
 
 // --------------------- Inserção, Remoção e Busca ---------------------
 
-// Retorna o antecedente em ordem simétrica
-int inOrderPredKey(AVLNodo *tree)
-{
-    if (tree == NULL)
-        return -1;
-
-    while (tree->rChild)
-        tree = tree->rChild;
-
-    return tree->key;
-}
-
 // Retirar um elemento da árvore
 AVLNodo *removeNodo(AVLNodo **raiz, int key)
 {
+    AVLNodo *ptr = *raiz, *tailPtr = NULL;
+
     if (*raiz == NULL)
+    {
+        printf("\nArvore vazia.\n");
         return NULL;
-
-    AVLNodo *temp;
-
-    if ((*raiz)->key == key) // Achamos o nodo a ser apagado
-    {
-        temp = *raiz; // Salvamos o nó que vai ser removido
-
-        if ((*raiz)->lChild == NULL && (*raiz)->rChild == NULL) // Nó folha
-            *raiz = NULL;
-
-        else if ((*raiz)->lChild == NULL || (*raiz)->rChild == NULL) // Não tem um dos filhos
-            *raiz = (*raiz)->lChild == NULL ? (*raiz)->rChild : (*raiz)->lChild;
-
-        else
-        {
-            // Se chegar até aqui é pq o nó a ser apagados tem dois filhos
-            // Vamos então pegar o antecessor in-ordem dele (maior nó da sub-árvore à esquerda)
-            // e colocar no lugar
-            AVLNodo *pred = removeNodo(&((*raiz)->lChild), inOrderPredKey((*raiz)->lChild));
-
-            pred->lChild = (*raiz)->lChild;
-            pred->rChild = (*raiz)->rChild;
-            *raiz = pred;
-        }
     }
-    else
+
+    // Procura o nodo para remover
+    while (ptr && ptr->key != key)
     {
-        if (key < (*raiz)->key)
-            temp = removeNodo((&(*raiz)->lChild), key);
+        tailPtr = ptr;
+
+        if (key < ptr->key)
+            ptr = ptr->lChild;
         else
-            temp = removeNodo(&((*raiz)->rChild), key);
+            ptr = ptr->rChild;
+    }
+
+    if (ptr == NULL) // Não encontrou o nó a ser removido
+    {
+        printf("\nNodo nao encontrado.\n");
+        return NULL;
+    }
+
+    if (ptr->lChild == NULL && ptr->rChild == NULL) // Se for uma folha
+    {
+        if (ptr == *raiz)
+            *raiz = NULL;
+        else if (ptr->key < tailPtr->key)
+            tailPtr->lChild = NULL;
+        else
+            tailPtr->rChild = NULL;
+    }
+    else if (ptr->lChild == NULL || ptr->rChild == NULL) // Se não tem um dos filhos
+    {
+        if (ptr == *raiz)
+            *raiz = (ptr->lChild == NULL) ? ptr->rChild : ptr->lChild;
+        else if (ptr->key < tailPtr->key)
+            tailPtr->lChild = (ptr->lChild == NULL) ? ptr->rChild : ptr->lChild;
+        else
+            tailPtr->rChild = (ptr->lChild == NULL) ? ptr->rChild : ptr->lChild;
+    }
+    else // Se tem os dois filhos
+    {
+        // Obtemos o antecedente in-ordem do nó a ser deletado
+        AVLNodo *inPred = ptr->lChild, *tailInPred = NULL;
+
+        while (inPred && inPred->rChild)
+        {
+            tailInPred = inPred;
+            inPred = inPred->rChild;
+        }
+
+        if (tailInPred)
+        {
+            tailInPred->rChild = inPred->lChild;
+            inPred->lChild = ptr->lChild;
+        }
+
+        inPred->rChild = ptr->rChild;
+
+        if (tailPtr)
+        {
+            if (ptr->key < tailPtr->key)
+                tailPtr->lChild = inPred;
+            else
+                tailPtr->rChild = inPred;
+        }
+        else
+            *raiz = inPred;
     }
 
     if (*raiz)
         balancear(raiz);
 
-    return temp;
+    return ptr;
 }
 
 // Insere um elemento na árvore
@@ -244,6 +270,15 @@ AVLNodo *buscarEl(AVLNodo *tree, unsigned int key)
 // --------------------- Outras ---------------------
 
 // Função usada para obter a altura de uma árvore
+
+/*
+A função para achar a altura sem usar recursão exige uma fila.
+Sua conversão para iterativa não vale a pena, pois o custo de desenvolvimento
+e de recursos computacionais são maiores.
+
+A mesma coisa acontece na função que obtém a quantidade de elementos na árvore e
+na função que libera a árvore.
+*/
 int alturaArv(AVLNodo *tree)
 {
     if (tree == NULL)
@@ -352,8 +387,8 @@ void imprimeArvVerticalRec(AVLNodo *nodo, int tab, char c)
 
     printf(" %c ", c);
 
-    // printf("ADD: %p | Key: %3u | $%1.2f | %s | lChild: %p | rChild: %p\n", nodo, nodo->key, nodo->preco, nodo->produto, nodo->lChild, nodo->rChild);
-    printf("Key: %3u | $%1.2f | %s \n", nodo->key, nodo->preco, nodo->produto);
+    printf("ADD: %p | Key: %3u | $%1.2f | %s | lChild: %p | rChild: %p\n", nodo, nodo->key, nodo->preco, nodo->produto, nodo->lChild, nodo->rChild);
+    // printf("Key: %3u | $%1.2f | %s \n", nodo->key, nodo->preco, nodo->produto);
 
     if (nodo->lChild != NULL)
         imprimeArvVerticalRec(nodo->lChild, tab + 1, 'L');
@@ -368,8 +403,8 @@ void imprimeArvVertical(AVLNodo *nodo)
     {
         printf("root: ");
 
-        // printf("ADD: %p | Key: %3u | $%1.2f | %s | lChild: %p | rChild: %p\n", nodo, nodo->key, nodo->preco, nodo->produto, nodo->lChild, nodo->rChild);
-        printf("Key: %3u | $%1.2f | %s \n", nodo->key, nodo->preco, nodo->produto);
+        printf("ADD: %p | Key: %3u | $%1.2f | %s | lChild: %p | rChild: %p\n", nodo, nodo->key, nodo->preco, nodo->produto, nodo->lChild, nodo->rChild);
+        // printf("Key: %3u | $%1.2f | %s \n", nodo->key, nodo->preco, nodo->produto);
 
         if (nodo->lChild != NULL)
             imprimeArvVerticalRec(nodo->lChild, 1, 'L');
