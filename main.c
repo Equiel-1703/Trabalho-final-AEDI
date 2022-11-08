@@ -84,7 +84,7 @@ int main(int argc, char const *argv[])
 {
     AVLNodo *mainTree = NULL, *el;
 
-    int maiorQtdeDigs = 0, choice;
+    int maiorQtdeDigs = 0, choice, aux;
 
     unsigned int usrKey;
     float preco;
@@ -115,13 +115,25 @@ int main(int argc, char const *argv[])
         {
         // Inserir
         case 1:
-            printf("Chave: ");
-            readUnsInteger(&usrKey);
-            if (usrKey == 0)
+            while (1)
             {
-                printf("Valor invalido!\n");
-                getchar();
-                break;
+                printf("Chave: ");
+                readUnsInteger(&usrKey);
+                if (usrKey == 0)
+                {
+                    printf("Valor invalido!\n");
+                    getchar();
+                    break;
+                }
+                else // Valida elemento repetido
+                {
+                    if (buscarEl(mainTree, usrKey))
+                    {
+                        printf("\nEsta chave ja existe! Insira outra.\n\n");
+                        continue;
+                    }
+                    break;
+                }
             }
 
             printf("Preco do produto: ");
@@ -132,7 +144,7 @@ int main(int argc, char const *argv[])
             cleanBuff();
 
             // Atualiza o valor da maior quantidade de dígitos nas chaves da árvore
-            int aux = getQtdeDigts(usrKey);
+            aux = getQtdeDigts(usrKey);
             maiorQtdeDigs = (aux > maiorQtdeDigs) ? aux : maiorQtdeDigs;
 
             // printf("\nQtde digitos: %d\n", maiorQtdeDigs);
@@ -207,7 +219,7 @@ int main(int argc, char const *argv[])
                             getchar();
                             continue;
                         }
-                        else
+                        else // Valida elemento repetido
                         {
                             if (buscarEl(mainTree, usrKey))
                             {
@@ -219,7 +231,7 @@ int main(int argc, char const *argv[])
                     }
 
                     // Atualiza o valor da maior quantidade de dígitos nas chaves da árvore
-                    int aux = getQtdeDigts(usrKey);
+                    aux = getQtdeDigts(usrKey);
                     maiorQtdeDigs = (aux > maiorQtdeDigs) ? aux : maiorQtdeDigs;
 
                     // printf("\nQtde digitos: %d\n", maiorQtdeDigs);
@@ -265,8 +277,6 @@ int main(int argc, char const *argv[])
                 imprimeEl(el);
                 free(el);
             }
-            else
-                printf("\nO elemento nao existe na arvore.");
 
             getchar();
             break;
