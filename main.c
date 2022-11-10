@@ -1,7 +1,19 @@
-#include "AVL.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "AVL.h"
+
+// Configura o comando de limpar tela para o windows e para o linux
+#ifdef _WIN32
+
+#define CLEAR_SCREEN system("cls")
+
+#else
+
+#define CLEAR_SCREEN system("clear")
+
+#endif
 
 // Essa função apenas limpa o buffer da stdin
 void cleanBuff()
@@ -92,6 +104,7 @@ int main(int argc, char const *argv[])
 
     // Cria a string que será passada para o scanf de leitura do nome do produto
     snprintf(format, sizeof(format), "%%%d[^\n]s", TAM_PROD_STR - 1);
+    CLEAR_SCREEN;
 
     while (1)
     {
@@ -184,98 +197,110 @@ int main(int argc, char const *argv[])
 
         // Editar valor de um elemento
         case 5:
-            printf("Informe a chave do elemento que deseja editar: ");
-            readUnsInteger(&usrKey);
+            if (estaVazia(mainTree))
+                printf("Arvore vazia.\n");
 
-            // Remove o elemento a ser editado
-            el = removeNodo(&mainTree, usrKey);
-
-            if (el)
+            else
             {
-                printf("\n");
+                printf("Informe a chave do elemento que deseja editar: ");
+                readUnsInteger(&usrKey);
 
-                // Exibe para o usuário o elemento que ele está editando
-                imprimeEl(el);
+                // Remove o elemento a ser editado
+                el = removeNodo(&mainTree, usrKey);
 
-                // Salva as informações do elemento
-                usrKey = getElKey(el);
-                preco = getElPrice(el);
-                strncpy(nomeProd, getElName(el), TAM_PROD_STR * sizeof(char));
-
-                // Apaga o elemento da memoria
-                free(el);
-
-                // Nova chave
-                printf("\nDeseja alterar a chave? s/n\n");
-                if (simNaoPrompt())
+                if (el)
                 {
-                    while (1)
+                    printf("\n");
+
+                    // Exibe para o usuário o elemento que ele está editando
+                    imprimeEl(el);
+
+                    // Salva as informações do elemento
+                    usrKey = getElKey(el);
+                    preco = getElPrice(el);
+                    strncpy(nomeProd, getElName(el), TAM_PROD_STR * sizeof(char));
+
+                    // Apaga o elemento da memoria
+                    free(el);
+
+                    // Nova chave
+                    printf("\nDeseja alterar a chave? s/n\n");
+                    if (simNaoPrompt())
                     {
-                        printf("Chave: ");
-                        readUnsInteger(&usrKey);
-                        if (usrKey == 0)
+                        while (1)
                         {
-                            printf("Valor invalido! Tente novamente.\n");
-                            getchar();
-                            continue;
-                        }
-                        else // Valida elemento repetido
-                        {
-                            if (buscarEl(mainTree, usrKey))
+                            printf("Chave: ");
+                            readUnsInteger(&usrKey);
+                            if (usrKey == 0)
                             {
-                                printf("\nEsta chave ja existe! Insira outra.\n\n");
+                                printf("Valor invalido! Tente novamente.\n");
+                                getchar();
                                 continue;
                             }
-                            break;
+                            else // Valida elemento repetido
+                            {
+                                if (buscarEl(mainTree, usrKey))
+                                {
+                                    printf("\nEsta chave ja existe! Insira outra.\n\n");
+                                    continue;
+                                }
+                                break;
+                            }
                         }
+
+                        // Atualiza o valor da maior quantidade de dígitos nas chaves da árvore
+                        aux = getQtdeDigts(usrKey);
+                        maiorQtdeDigs = (aux > maiorQtdeDigs) ? aux : maiorQtdeDigs;
+
+                        // printf("\nQtde digitos: %d\n", maiorQtdeDigs);
                     }
 
-                    // Atualiza o valor da maior quantidade de dígitos nas chaves da árvore
-                    aux = getQtdeDigts(usrKey);
-                    maiorQtdeDigs = (aux > maiorQtdeDigs) ? aux : maiorQtdeDigs;
+                    // Novo preco
+                    printf("Deseja alterar o preco? s/n\n");
+                    if (simNaoPrompt())
+                    {
+                        printf("Preco do produto: ");
+                        readFloat(&preco);
+                    }
 
-                    // printf("\nQtde digitos: %d\n", maiorQtdeDigs);
+                    // Novo nome
+                    printf("Deseja alterar o nome do produto? s/n\n");
+                    if (simNaoPrompt())
+                    {
+                        printf("Nome do produto: ");
+                        scanf(format, nomeProd);
+                        cleanBuff();
+                    }
+
+                    // Insere o elemento editado
+                    if (incluir(&mainTree, usrKey, preco, nomeProd))
+                        printf("\nFeito!\n");
                 }
-
-                // Novo preco
-                printf("Deseja alterar o preco? s/n\n");
-                if (simNaoPrompt())
-                {
-                    printf("Preco do produto: ");
-                    readFloat(&preco);
-                }
-
-                // Novo nome
-                printf("Deseja alterar o nome do produto? s/n\n");
-                if (simNaoPrompt())
-                {
-                    printf("Nome do produto: ");
-                    scanf(format, nomeProd);
-                    cleanBuff();
-                }
-
-                // Insere o elemento editado
-                if (incluir(&mainTree, usrKey, preco, nomeProd))
-                    printf("\nFeito!\n");
+                else
+                    printf("\nO elemento nao existe.\n");
             }
-            else
-                printf("\nO elemento nao existe.\n");
 
             getchar();
             break;
 
         // Excluir
         case 6:
-            printf("Digite uma chave para excluir: ");
-            readUnsInteger(&usrKey);
+            if (estaVazia(mainTree))
+                printf("Arvore vazia.\n");
 
-            el = removeNodo(&mainTree, usrKey);
-
-            if (el)
+            else
             {
-                printf("\nElemento removido: \n");
-                imprimeEl(el);
-                free(el);
+                printf("Digite uma chave para excluir: ");
+                readUnsInteger(&usrKey);
+
+                el = removeNodo(&mainTree, usrKey);
+
+                if (el)
+                {
+                    printf("\nElemento removido: \n");
+                    imprimeEl(el);
+                    free(el);
+                }
             }
 
             getchar();
@@ -311,7 +336,7 @@ int main(int argc, char const *argv[])
             break;
         }
 
-        system("cls");
+        CLEAR_SCREEN;
     }
 
     return 0;

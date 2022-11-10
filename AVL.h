@@ -20,6 +20,9 @@ int qtdeElementos(AVLNodo *tree);
 // Desaloca a árvore da memória
 void freeTree(AVLNodo *tree);
 
+// Verifica arvore vazia
+int estaVazia(AVLNodo *tree);
+
 // Funções de impressão
 void imprimeEl(AVLNodo *el);
 void imprimePorNivel(AVLNodo *root, int noOfDigits);

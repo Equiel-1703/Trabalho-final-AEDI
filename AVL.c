@@ -1,8 +1,9 @@
-#include "AVL.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
+#include "AVL.h"
 
 struct _avlNode
 {
@@ -229,6 +230,12 @@ AVLNodo *buscarEl(AVLNodo *tree, unsigned int key)
 }
 
 // --------------------- Outras ---------------------
+
+// Verifica se a árvore está vazia
+int estaVazia(AVLNodo *tree)
+{
+    return tree ? 0 : 1;
+}
 
 // Função usada para obter a altura de uma árvore
 int alturaArv(AVLNodo *tree)
